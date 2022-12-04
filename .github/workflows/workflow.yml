@@ -7,7 +7,7 @@ jobs:
     name: Deploy services
     strategy:
       matrix:
-        serviceName: ['jokes-service']
+        serviceName: ['jokes-service','color-service']
     runs-on: ubuntu-latest
 
     steps:

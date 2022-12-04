@@ -11,6 +11,6 @@ export class AppController {
 
   @Get('/color')
   getHealth() {
-    return { color: 'red' }
+    return { color: 'blue' }
   }
 }

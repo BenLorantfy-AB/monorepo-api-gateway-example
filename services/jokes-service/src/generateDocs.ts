@@ -13,7 +13,7 @@ async function generate() {
     logger: false
   });
   const config = new DocumentBuilder()
-    .setTitle('Jokes service')
+    .setTitle('jokes-service')
     .setDescription('API for generating jokes')
     .setVersion('1.0')
     .addTag('jokes')

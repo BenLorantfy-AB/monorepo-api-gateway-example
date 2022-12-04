@@ -48,8 +48,11 @@ jobs:
           yarn build
 
           echo "Deploying to API Gateway"
+          api_id=$(aws apigatewayv2 get-apis --query "Items[?@.Name=='jokesservice'].ApiId" | jq ".[0]" --raw-output)
+          echo "API ID is $api_id"
+
           node ./dist/generateDocs.js http://3.134.98.61:8080 > api-definition.json
-          aws apigatewayv2 reimport-api --body file://./api-definition.json --api-id l1dkv23jh7
+          aws apigatewayv2 reimport-api --body file://./api-definition.json --api-id $api_id
           rm api-definition.json
 
           echo "Copying files to remote"

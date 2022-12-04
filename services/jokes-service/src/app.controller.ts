@@ -24,8 +24,13 @@ export class AppController {
     return { message: 'who is there?' }
   }
 
-  @Get('/health/:param')
+  @Get('/joke3')
+  getJoke3() {
+    return { message: 'orange' }
+  }
+
+  @Get('/jokes/:id')
   getHealth2(@Param() params: { param: string }) {
-    return { status: 'still healthy, ' + params.param }
+    return { status: `Could not find joke with ID = ${params.param}` }
   }
 }

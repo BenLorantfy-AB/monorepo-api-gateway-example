@@ -51,8 +51,16 @@ jobs:
           api_id=$(aws apigatewayv2 get-apis --query "Items[?@.Name=='${{ matrix.serviceName }}'].ApiId" | jq ".[0]" --raw-output)
           echo "API ID is $api_id"
 
-          node ./dist/generateDocs.js http://3.134.98.61:8080 > api-definition.json
-          aws apigatewayv2 reimport-api --body file://./api-definition.json --api-id $api_id
+          node ./dist/generateDocs.js http://3.134.98.61 > api-definition.json
+
+          if [ $api_id == "null" ]; then
+            echo "API does not exist yet so creating new API in API gateway..."
+            aws apigatewayv2 import-api --body file://./api-definition.json
+          else
+            echo "API already exists, re-importing..."
+            aws apigatewayv2 reimport-api --body file://./api-definition.json --api-id $api_id
+          fi
+
           rm api-definition.json
 
           echo "Copying files to remote"

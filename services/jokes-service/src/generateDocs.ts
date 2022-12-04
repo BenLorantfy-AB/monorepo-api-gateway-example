@@ -2,29 +2,39 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
 import { cloneDeep } from 'lodash';
+import { config } from './config';
 
 async function generate() {
-  const backendUrl = process.argv[2];
-  if (typeof backendUrl !== 'string') {
+  const backendHost = process.argv[2];
+  if (typeof backendHost !== 'string') {
     throw new Error('Please provide the backend url as the first positional parameter');
   }
 
   const app = await NestFactory.create(AppModule, {
     logger: false
   });
-  const config = new DocumentBuilder()
-    .setTitle('jokes-service')
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle(config.serviceName)
     .setDescription('API for generating jokes')
     .setVersion('1.0')
     .addTag('jokes')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  const documentWithAwsExtensions = addAwsExtensions(document, backendUrl);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  const documentWithAwsExtensions = addAwsExtensions(document, { 
+    backendHost, 
+    backendPort: config.port 
+  });
+
   console.log(JSON.stringify(documentWithAwsExtensions));
 }
 
-function addAwsExtensions(document: OpenAPIObject, backendUrl: string) {
+/**
+ * Adds AWS-specific data to the openapi spec so AWS gateway works
+ *
+ * TODO: move this to shared lib?
+ */
+function addAwsExtensions(document: OpenAPIObject, params: { backendHost: string, backendPort: string|number }) {
   const clonedDocument = cloneDeep(document);
   for (let pathKey in clonedDocument.paths) {
     for (let method in clonedDocument.paths[pathKey]) {
@@ -42,7 +52,7 @@ function addAwsExtensions(document: OpenAPIObject, backendUrl: string) {
           "payloadFormatVersion" : "1.0",
           "type" : "http_proxy",
           "httpMethod" : "ANY",
-          "uri" : `${backendUrl}${pathKey}`,
+          "uri" : `${params.backendHost}:${params.backendPort}${pathKey}`,
           "connectionType" : "INTERNET"
         }
       })

@@ -14,6 +14,11 @@ export class AppController {
     return { status: 'still healthy' }
   }
 
+  @Get('/joke')
+  getJoke() {
+    return { message: 'knock knock?' }
+  }
+
   @Get('/health/:param')
   getHealth2(@Param() params: { param: string }) {
     return { status: 'still healthy, ' + params.param }

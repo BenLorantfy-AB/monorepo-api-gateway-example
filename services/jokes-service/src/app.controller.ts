@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 
 @Controller()
 export class AppController {
@@ -12,5 +12,10 @@ export class AppController {
   @Get('/health')
   getHealth() {
     return { status: 'still healthy' }
+  }
+
+  @Get('/health/:param')
+  getHealth2(@Param() params: { param: string }) {
+    return { status: 'still healthy, ' + params.param }
   }
 }

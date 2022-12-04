@@ -48,7 +48,7 @@ jobs:
           yarn build
 
           echo "Deploying to API Gateway"
-          api_id=$(aws apigatewayv2 get-apis --query "Items[?@.Name=='jokesservice'].ApiId" | jq ".[0]" --raw-output)
+          api_id=$(aws apigatewayv2 get-apis --query "Items[?@.Name=='${{ matrix.serviceName }}'].ApiId" | jq ".[0]" --raw-output)
           echo "API ID is $api_id"
 
           node ./dist/generateDocs.js http://3.134.98.61:8080 > api-definition.json

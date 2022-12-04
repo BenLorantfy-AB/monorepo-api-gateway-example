@@ -47,6 +47,11 @@ jobs:
           echo "Building service"
           yarn build
 
+          echo "Deploying to API Gateway"
+          node ./dist/generateDocs.js http://3.134.98.61:8080 > api-definition.json
+          aws apigatewayv2 reimport-api --body file://./api-definition.json --api-id l1dkv23jh7
+          rm api-definition.json
+
           echo "Copying files to remote"
           rm -rf node_modules
           rm -rf src
@@ -58,7 +63,3 @@ jobs:
 
           echo "Restarting service"
           ssh -o StrictHostKeyChecking=no ubuntu@3.134.98.61 "~/.npm-global/bin/pm2 restart ${{ matrix.serviceName }}"
-
-          echo "Deploying to API Gateway"
-          node ./dist/generateDocs.js http://3.134.98.61:8080 > api-definition.json
-          aws apigatewayv2 reimport-api --body file://./api-definition.json --api-id l1dkv23jh7

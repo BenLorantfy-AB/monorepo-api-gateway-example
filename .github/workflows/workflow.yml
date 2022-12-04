@@ -1,0 +1,57 @@
+name: Deploy
+
+on: push
+
+jobs:
+  deploy:
+    name: Deploy services
+    strategy:
+      matrix:
+        serviceName: ['jokes-service']
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Deploy
+        run: |      
+          echo "Setting up SSH key"
+          mkdir ~/.ssh
+          touch ~/.ssh/id_rsa
+          echo ${{ secrets.SSH_PRIVATE_KEY_BASE64 }} | base64 --decode > ~/.ssh/id_rsa
+          sudo chmod 600 ~/.ssh/id_rsa
+
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+
+          echo "Moving yarn.lock to service"
+          mv yarn.lock services/${{ matrix.serviceName }}
+          rm package.json
+
+          cd ./services/${{ matrix.serviceName }}
+          echo "Installing deps"
+          yarn
+          echo "Building service"
+          yarn build
+
+          echo "Copying files to remote"
+          rm -rf node_modules
+          rm -rf src
+          rm -rf test
+          rsync -e "ssh -o StrictHostKeyChecking=no" -a . ubuntu@3.134.98.61:${{ matrix.serviceName }}
+
+          echo "Installing deps on remote"
+          ssh -o StrictHostKeyChecking=no ubuntu@3.134.98.61 "cd ${{ matrix.serviceName }} && ~/.npm-global/bin/yarn"
+
+          echo "Restarting service"
+          ssh -o StrictHostKeyChecking=no ubuntu@3.134.98.61 "~/.npm-global/bin/pm2 restart ${{ matrix.serviceName }}"
+
+
+
+

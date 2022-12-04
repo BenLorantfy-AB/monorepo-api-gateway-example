@@ -2,8 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+async function generate() {
+  const app = await NestFactory.create(AppModule, {
+    logger: false
+  });
   const config = new DocumentBuilder()
     .setTitle('Jokes service')
     .setDescription('API for generating jokes')
@@ -12,8 +14,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-
-  await app.listen(8080);
+  console.log(JSON.stringify(document));
 }
-bootstrap();
+
+generate();

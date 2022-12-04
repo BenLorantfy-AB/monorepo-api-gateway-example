@@ -73,4 +73,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no ubuntu@3.134.98.61 "cd ${{ matrix.serviceName }} && ~/.npm-global/bin/yarn"
 
           echo "Restarting service"
+          ssh -o StrictHostKeyChecking=no ubuntu@3.134.98.61 "cd ${{ matrix.serviceName }} && ~/.npm-global/bin/pm2 start dist/main.js --name ${{ matrix.serviceName }}" || true # Allow to fail incase it's already started
           ssh -o StrictHostKeyChecking=no ubuntu@3.134.98.61 "~/.npm-global/bin/pm2 restart ${{ matrix.serviceName }}"

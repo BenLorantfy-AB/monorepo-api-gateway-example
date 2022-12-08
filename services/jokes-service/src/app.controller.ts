@@ -28,6 +28,11 @@ export class AppController {
   getJoke3() {
     return { message: 'orange' }
   }
+  
+  @Get('/joke4')
+  getJoke4() {
+    return { message: 'hello' }
+  }
 
   @Get('/jokes/:id')
   getHealth2(@Param() params: { param: string }) {
